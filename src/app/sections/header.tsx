@@ -21,7 +21,7 @@ export default function Header() {
       transition={{ duration: 0.5 }}
     >
 <div className="text-xl font-bold tracking-tight">
-  <a href="https://www.molohub.com"> 
+  <a href="https://molohub.com/"> 
     <span className="text-white text-2xl inline-block rotate-[-5deg]">Molo</span>
     </a>
     {' '}
