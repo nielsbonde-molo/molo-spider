@@ -51,76 +51,64 @@ export async function POST(req: Request) {
     const script = path.resolve('src/scripts/crawler.py');
     const output = path.resolve(`src/app/data/results/crawl_${crawlId}.csv`);
 
-    return new Promise((resolve) => {
-      const python = spawn('python3', [script, domain, output, crawlId]);
+    // Start the Python crawler process
+    const python = spawn('python3', [script, domain, output, crawlId]);
 
-      let stdout = '';
-      let stderr = '';
+    let stdout = '';
+    let stderr = '';
 
-      python.stdout.on('data', (data) => {
-        const output = data.toString();
-        stdout += output;
-        // Log to console for debugging
-        console.log('[PYTHON OUT]', output.trim());
-      });
+    python.stdout.on('data', (data) => {
+      const output = data.toString();
+      stdout += output;
+      // Log to console for debugging
+      console.log('[PYTHON OUT]', output.trim());
+    });
 
-      python.stderr.on('data', (data) => {
-        const error = data.toString();
-        stderr += error;
-        console.error('[PYTHON ERR]', error.trim());
-      });
+    python.stderr.on('data', (data) => {
+      const error = data.toString();
+      stderr += error;
+      console.error('[PYTHON ERR]', error.trim());
+    });
 
-      python.on('close', async (code) => {
-        if (code === 0) {
-          // Update status to 'finished'
-          await supabaseAdmin
-            .from('crawls')
-            .update({ status: 'finished' })
-            .eq('id', crawlId);
-
-          resolve(NextResponse.json({
-            success: true,
-            crawlId,
-            output: stdout,
-          }));
-        } else {
-          // Update status to 'failed'
-          await supabaseAdmin
-            .from('crawls')
-            .update({ 
-              status: 'failed',
-              error_message: `Crawler exited with code ${code}. Stderr: ${stderr}`
-            })
-            .eq('id', crawlId);
-
-          console.error('❌ Crawler execution failed with code:', code);
-          
-          resolve(NextResponse.json({
-            success: false,
-            error: 'Crawler execution failed',
-            crawlId: crawlId
-          }, { status: 500 }));
-        }
-      });
-
-      python.on('error', async (error) => {
+    // Set up event handlers for the Python process
+    python.on('close', async (code) => {
+      if (code === 0) {
+        // Update status to 'finished'
+        await supabaseAdmin
+          .from('crawls')
+          .update({ status: 'finished' })
+          .eq('id', crawlId);
+        console.log('✅ Crawl completed successfully:', crawlId);
+      } else {
         // Update status to 'failed'
         await supabaseAdmin
           .from('crawls')
           .update({ 
             status: 'failed',
-            error_message: `Failed to start crawler: ${error.message}`
+            error_message: `Crawler exited with code ${code}. Stderr: ${stderr}`
           })
           .eq('id', crawlId);
+        console.error('❌ Crawler execution failed with code:', code);
+      }
+    });
 
-        console.error('❌ Failed to start crawler:', error);
-        
-        resolve(NextResponse.json({
-          success: false,
-          error: `Failed to start crawler: ${error.message}`,
-          crawlId: crawlId
-        }, { status: 500 }));
-      });
+    python.on('error', async (error) => {
+      // Update status to 'failed'
+      await supabaseAdmin
+        .from('crawls')
+        .update({ 
+          status: 'failed',
+          error_message: `Failed to start crawler: ${error.message}`
+        })
+        .eq('id', crawlId);
+      console.error('❌ Failed to start crawler:', error);
+    });
+
+    // Return immediately with success, the crawler will run in background
+    return NextResponse.json({
+      success: true,
+      crawlId,
+      message: 'Crawl started successfully. Check dashboard for progress.',
     });
 
                 } catch (error: unknown) {
