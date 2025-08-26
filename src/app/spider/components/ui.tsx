@@ -8,7 +8,7 @@ export default function SpiderUI() {
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState<string[]>([]);
   const [currentUrl, setCurrentUrl] = useState('');
-  const [crawlId, setCrawlId] = useState('');
+
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Update current URL whenever progress changes
@@ -68,11 +68,12 @@ export default function SpiderUI() {
         setProgress(lines.slice(-15)); // Show last 15 lines
       }
       
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
         setMessage('❌ Crawl cancelled by user');
       } else {
-        setMessage(`❌ Error: ${error.message || 'Unknown error'}`);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        setMessage(`❌ Error: ${errorMessage}`);
       }
     } finally {
       setIsLoading(false);

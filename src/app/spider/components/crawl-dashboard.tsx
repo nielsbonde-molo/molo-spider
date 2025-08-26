@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import supabase from '@/lib/supabase';
 
 interface Crawl {
@@ -51,9 +51,10 @@ export default function CrawlDashboard() {
       // Refresh the data immediately without loading state
       fetchCrawlsWithMetrics(false);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Error stopping crawl:', err);
-      alert(`Could not stop crawl: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      alert(`Could not stop crawl: ${errorMessage}`);
     }
   };
 
@@ -129,7 +130,7 @@ export default function CrawlDashboard() {
     }
   };
 
-  const calculateSEOMetrics = (pages: any[]) => {
+  const calculateSEOMetrics = (pages: Array<{ title?: string; meta_description?: string; h1_count?: number; h2_count?: number; h3_count?: number; h4_count?: number; h5_count?: number; h6_count?: number; text_length?: number; status_code?: number; internal_links?: number; external_links?: number; nofollow_links?: number }>) => {
     let seoScore = 100;
     const issues: string[] = [];
     const warnings: string[] = [];
@@ -153,28 +154,28 @@ export default function CrawlDashboard() {
     }
 
     // Check for pages without H1
-    const pagesWithoutH1 = pages.filter(p => p.h1_count === 0);
+    const pagesWithoutH1 = pages.filter(p => (p.h1_count ?? 0) === 0);
     if (pagesWithoutH1.length > 0) {
       seoScore -= 5;
       warnings.push(`${pagesWithoutH1.length} pages without H1 headings`);
     }
 
     // Check for pages with multiple H1s
-    const pagesWithMultipleH1 = pages.filter(p => p.h1_count > 1);
+    const pagesWithMultipleH1 = pages.filter(p => (p.h1_count ?? 0) > 1);
     if (pagesWithMultipleH1.length > 0) {
       seoScore -= 3;
       warnings.push(`${pagesWithMultipleH1.length} pages with multiple H1 headings`);
     }
 
     // Check for pages with low text content
-    const pagesWithLowContent = pages.filter(p => p.text_length < 300);
+    const pagesWithLowContent = pages.filter(p => (p.text_length ?? 0) < 300);
     if (pagesWithLowContent.length > 0) {
       seoScore -= 5;
       warnings.push(`${pagesWithLowContent.length} pages with low text content (<300 chars)`);
     }
 
     // Check for 4xx/5xx status codes
-    const errorPages = pages.filter(p => p.status_code >= 400);
+    const errorPages = pages.filter(p => (p.status_code ?? 200) >= 400);
     if (errorPages.length > 0) {
       seoScore -= 15;
       issues.push(`${errorPages.length} pages with error status codes`);
@@ -320,7 +321,7 @@ export default function CrawlDashboard() {
         {crawls.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
             <h3 className="text-xl font-semibold text-gray-900 mb-3">No crawls yet</h3>
-            <p className="text-gray-600 mb-6">Start your first crawl to analyze a website's SEO structure.</p>
+            <p className="text-gray-600 mb-6">Start your first crawl to analyze a website&apos;s SEO structure.</p>
             <Link
               href="/spider/new"
               className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl"

@@ -36,11 +36,12 @@ export async function GET() {
       data: data
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Test failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json({
       success: false,
-      error: error.message
+      error: errorMessage
     }, { status: 500 });
   }
 } 

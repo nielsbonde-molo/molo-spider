@@ -10,7 +10,7 @@ export default function NewCrawlForm() {
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState<string[]>([]);
   const [currentUrl, setCurrentUrl] = useState('');
-  const [crawlId, setCrawlId] = useState('');
+
   const abortControllerRef = useRef<AbortController | null>(null);
   const router = useRouter();
 
@@ -74,11 +74,12 @@ export default function NewCrawlForm() {
         }, 2000);
       }
       
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
         setMessage('❌ Crawl cancelled by user');
       } else {
-        setMessage(`❌ Error: ${error.message || 'Unknown error'}`);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        setMessage(`❌ Error: ${errorMessage}`);
       }
     } finally {
       setIsLoading(false);
@@ -128,7 +129,7 @@ export default function NewCrawlForm() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">New Crawl</h1>
-              <p className="text-gray-600 mt-2">Start analyzing a website's SEO structure</p>
+              <p className="text-gray-600 mt-2">Start analyzing a website&apos;s SEO structure</p>
             </div>
             <Link
               href="/spider"

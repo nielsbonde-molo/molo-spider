@@ -81,7 +81,6 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'pages' | 'links' | 'seo'>('overview');
   const [seoAnalysis, setSeoAnalysis] = useState<SEOAnalysis | null>(null);
   const [selectedPage, setSelectedPage] = useState<string | null>(null);
-  const [linkAnalysis, setLinkAnalysis] = useState<{ [key: string]: LinkAnalysis }>({});
   const [expandedPages, setExpandedPages] = useState<Set<string>>(new Set());
   const [pageFilter, setPageFilter] = useState<'all' | 'critical' | 'warning' | 'ok'>('all');
   const [linkDetailsModal, setLinkDetailsModal] = useState<{
@@ -171,12 +170,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
       setSeoAnalysis(analysis);
       
       // Pre-calculate link analysis for all pages
-      const linkAnalysisData: { [key: string]: LinkAnalysis } = {};
-      pages.forEach(page => {
-        const pageLinks = analyzePageLinks(page.url, links);
-        linkAnalysisData[page.url] = pageLinks;
-      });
-      setLinkAnalysis(linkAnalysisData);
+      // Note: Link analysis is calculated on-demand when needed
     }
   }, [pages, links, images]);
 
@@ -215,7 +209,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
 
     // Calculate weighted penalties based on page count
     const totalPages = pages.length;
-    const basePenalty = 100 / totalPages; // Distribute penalties across pages
+            // Base penalty calculation for reference
     
     // Track total penalties for weighted calculation
     let totalPenalties = 0;
@@ -323,8 +317,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
 
     // Calculate weighted score based on page count and issue distribution
     const averagePenaltyPerPage = totalPenalties / totalPages;
-    const criticalIssueRate = criticalPenalties / totalPages;
-    const warningRate = warningPenalties / totalPages;
+            // Rate calculations for reference
     
     // Weight the score based on page count - more pages = less severe penalty per issue
     const pageWeight = Math.min(1, 10 / totalPages); // Cap at 10 pages for weighting
@@ -360,7 +353,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
     }
 
     // Check for broken links (if we have status codes)
-    const brokenLinks = links.filter(l => {
+    const brokenLinks = links.filter(() => {
       // This would need to be enhanced with actual link checking
       return false; // Placeholder
     });
@@ -394,12 +387,13 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
     };
   };
 
-  const getSEOScoreColor = (score: number) => {
-    if (score >= 80) return 'bg-green-100 text-green-800';
-    if (score >= 60) return 'bg-yellow-100 text-yellow-800';
-    if (score >= 40) return 'bg-orange-100 text-orange-800';
-    return 'bg-red-100 text-red-800';
-  };
+  // SEO score color function (unused but kept for future use)
+  // const getSEOScoreColor = (score: number) => {
+  //   if (score >= 80) return 'bg-green-100 text-green-800';
+  //   if (score >= 60) return 'bg-yellow-100 text-yellow-800';
+  //   if (score >= 40) return 'bg-orange-100 text-orange-800';
+  //   return 'bg-red-100 text-red-800';
+  // };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -1306,7 +1300,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
                                       </div>
                                       {image.alt && (
                                         <div className="text-sm text-gray-600">
-                                          <strong>Alt Text:</strong> "{image.alt}"
+                                          <strong>Alt Text:</strong> &quot;{image.alt}&quot;
                                         </div>
                                       )}
                                     </div>
@@ -1333,7 +1327,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
                       <label className="text-sm font-medium text-gray-700">Filter:</label>
                       <select
                         value={pageFilter}
-                        onChange={(e) => setPageFilter(e.target.value as any)}
+                        onChange={(e) => setPageFilter(e.target.value as 'all' | 'critical' | 'warning' | 'ok')}
                         className="text-sm border border-gray-300 rounded-md px-3 py-1"
                       >
                         <option value="all">All Pages ({pages.length})</option>
@@ -2014,7 +2008,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
                                 </div>
                                 {image.alt && (
                                   <div className="text-sm text-gray-600">
-                                    <strong>Alt Text:</strong> "{image.alt}"
+                                    <strong>Alt Text:</strong> &quot;{image.alt}&quot;
                                   </div>
                                 )}
                               </div>

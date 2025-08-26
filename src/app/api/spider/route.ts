@@ -20,16 +20,16 @@ export async function POST(req: Request) {
     console.log('🔍 Service role key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 
     // Insert crawl record with 'pending' status
-    const { data: crawlData, error: crawlError } = await supabaseAdmin
-      .from('crawls')
-      .insert({
-        id: crawlId,
-        domain: domain,
-        user_id: null,
-        status: 'pending'
-      })
-      .select()
-      .single();
+                    const { error: crawlError } = await supabaseAdmin
+                  .from('crawls')
+                  .insert({
+                    id: crawlId,
+                    domain: domain,
+                    user_id: null,
+                    status: 'pending'
+                  })
+                  .select()
+                  .single();
 
     if (crawlError) {
       console.error('❌ Error inserting crawl record:', crawlError);
@@ -123,12 +123,13 @@ export async function POST(req: Request) {
       });
     });
 
-  } catch (error: any) {
-    console.error('❌ Crawler error:', error);
+                } catch (error: unknown) {
+                console.error('❌ Crawler error:', error);
+                const errorMessage = error instanceof Error ? error.message : 'Internal server error';
 
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Internal server error',
-    }, { status: 500 });
-  }
+                return NextResponse.json({
+                  success: false,
+                  error: errorMessage,
+                }, { status: 500 });
+              }
 } 
