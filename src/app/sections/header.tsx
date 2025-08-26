@@ -21,8 +21,11 @@ export default function Header() {
       transition={{ duration: 0.5 }}
     >
 <div className="text-xl font-bold tracking-tight">
-  <span className="text-white text-2xl inline-block rotate-[-5deg]">Molo</span>{' '}
-  <span className="text-blue-400 text-xl inline-block px-4">Search Intelligence</span>
+  <a href="https://www.molohub.com"> 
+    <span className="text-white text-2xl inline-block rotate-[-5deg]">Molo</span>
+    </a>
+    {' '}
+    <span className="text-blue-400 text-xl inline-block px-4">Search Intelligence</span>
 </div>
 
       <nav className="flex gap-8 text-sm font-medium">
