@@ -52,7 +52,7 @@ export default function SpiderUI() {
 
       try {
         result = await response.json();
-      } catch (err) {
+      } catch {
         throw new Error("❌ Server did not return valid JSON.");
       }
 

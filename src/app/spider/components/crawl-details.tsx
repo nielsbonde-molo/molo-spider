@@ -80,7 +80,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'pages' | 'links' | 'seo'>('overview');
   const [seoAnalysis, setSeoAnalysis] = useState<SEOAnalysis | null>(null);
-  const [selectedPage, setSelectedPage] = useState<string | null>(null);
+
   const [expandedPages, setExpandedPages] = useState<Set<string>>(new Set());
   const [pageFilter, setPageFilter] = useState<'all' | 'critical' | 'warning' | 'ok'>('all');
   const [linkDetailsModal, setLinkDetailsModal] = useState<{
@@ -174,21 +174,22 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
     }
   }, [pages, links, images]);
 
-  const analyzePageLinks = (pageUrl: string, allLinks: PageLink[]): LinkAnalysis => {
-    const incomingLinks = allLinks.filter(link => link.to_url === pageUrl);
-    const outgoingLinks = allLinks.filter(link => link.from_url === pageUrl);
-    const internalLinks = outgoingLinks.filter(link => link.to_url.includes(new URL(crawl?.domain || '').hostname));
-    const externalLinks = outgoingLinks.filter(link => !link.to_url.includes(new URL(crawl?.domain || '').hostname));
-    const nofollowLinks = outgoingLinks.filter(link => link.is_nofollow);
+  // Link analysis function (unused but kept for future use)
+  // const analyzePageLinks = (pageUrl: string, allLinks: PageLink[]): LinkAnalysis => {
+  //   const incomingLinks = allLinks.filter(link => link.to_url === pageUrl);
+  //   const outgoingLinks = allLinks.filter(link => link.from_url === pageUrl);
+  //   const internalLinks = outgoingLinks.filter(link => link.to_url.includes(new URL(crawl?.domain || '').hostname));
+  //   const externalLinks = outgoingLinks.filter(link => !link.to_url.includes(new URL(crawl?.domain || '').hostname));
+  //   const nofollowLinks = outgoingLinks.filter(link => link.is_nofollow);
 
-    return {
-      incomingLinks,
-      outgoingLinks,
-      internalLinks,
-      externalLinks,
-      nofollowLinks
-    };
-  };
+  //   return {
+  //     incomingLinks,
+  //     outgoingLinks,
+  //     internalLinks,
+  //     externalLinks,
+  //     nofollowLinks
+  //   };
+  // };
 
   const performSEOAnalysis = (pages: Page[], links: PageLink[], images: PageImage[]): SEOAnalysis => {
     let seoScore = 100;
@@ -343,14 +344,15 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
       recommendations.push('Consider adding relevant images to improve user engagement');
     }
 
-    // Link analysis
-    const internalLinks = links.filter(l => l.to_url.includes(new URL(crawl?.domain || '').hostname));
-    const externalLinks = links.filter(l => !l.to_url.includes(new URL(crawl?.domain || '').hostname));
-    const nofollowLinks = links.filter(l => l.is_nofollow);
+    // Link analysis (unused but kept for future use)
+    // const internalLinks = links.filter(l => l.to_url.includes(new URL(crawl?.domain || '').hostname));
+    // const externalLinks = links.filter(l => !l.to_url.includes(new URL(crawl?.domain || '').hostname));
+    // const nofollowLinks = links.filter(l => l.is_nofollow);
 
-    if (internalLinks.length < pages.length) {
-      recommendations.push('Improve internal linking structure');
-    }
+    // Internal linking check (unused but kept for future use)
+    // if (internalLinks.length < pages.length) {
+    //   recommendations.push('Improve internal linking structure');
+    // }
 
     // Check for broken links (if we have status codes)
     const brokenLinks = links.filter(() => {
@@ -1496,7 +1498,7 @@ export default function CrawlDetails({ crawlId }: CrawlDetailsProps) {
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex items-center space-x-2">
                                 <button
-                                  onClick={() => setSelectedPage(page.url)}
+                                  onClick={() => handlePageDetailsClick(page)}
                                   className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors"
                                 >
                                   <span className="mr-1">🔍</span>

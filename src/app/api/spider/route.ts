@@ -54,12 +54,10 @@ export async function POST(req: Request) {
     // Start the Python crawler process
     const python = spawn('python3', [script, domain, output, crawlId]);
 
-    let stdout = '';
     let stderr = '';
 
     python.stdout.on('data', (data) => {
       const output = data.toString();
-      stdout += output;
       // Log to console for debugging
       console.log('[PYTHON OUT]', output.trim());
     });
